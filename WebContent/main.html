@@ -160,6 +160,18 @@ top:0;
     border:0;
     background:transparent;
 }
+
+
+.popover1 {
+
+top: 0;
+left: 15px;
+z-index: 1060;
+padding: 1px;
+background-color:#ffffff;
+}
+
+
  </style>
     
     <!--user's map javascript license key goes here-->
@@ -217,13 +229,13 @@ top:0;
      
 			      <label for="sel2">What's Your Interest Today?</label>
 			      <select multiple class="form-control" id="interests">
-			        <option  value="natural_feature">Natural features</option>
+			        <option selected = "selected" value="natural_feature">Natural features</option>
 			        <option value="amusement_park">Amusement Parks</option>
 			        <option value="zoo">Zoo</option>
 			        <option value="stadium">Stadium</option>
 			        <option value="art_gallery">Art Gallery</option>
 			        <option value="book_store">Book Store</option>
-			        <option selected = "selected" value="shopping_mall">Shopping Mall </option>
+			        <option  value="shopping_mall">Shopping Mall </option>
 			         <option value="restaurant">Restaurant</option>
 			         <option value="establishment">Establishment</option>
 			         <option value="night_club">Night Clubs</option>
@@ -273,10 +285,21 @@ top:0;
                     <input  type="text" class="form-control" id="start" value="" placeholder="e.g:27.157015,77.991600" autocomplete="off" > 
  			 		<span class="input-group-addon">
                             
-                             <button onclick="var v=$('#start').val(); $('#start').val($('#destination').val()); $('#destination').val(v);" type="submit">
+                             <button onclick="var v=$('#start').val(); $('#start').val($('#destination').val()); $('#destination').val(v);   var v1=$('#startTitle').val(); $('#startTitle').val($('#destTitle').val()); $('#destTitle').val(v);" type="submit">
                             <span data-toggle="tooltip" title="Swap Directions" data-placement="top" class="glyphicon glyphicon-refresh"></span>
                         </button> 
                                            
+                   </span>
+ 			 </div>
+			
+			<label class="control-label" >Via:&nbsp;<p style="display:inline;" id="viaTitle"></p>				  </label>
+			<div id="divDest" class=" input-group stylish-input-group">				
+                    <input  type="text" class="form-control" id="via" value="" placeholder="e.g:27.157015,77.991600" autocomplete="off" > 
+ 			 		<span class="input-group-addon">
+                             
+                             <button onclick="$('#via').val('');$('#viaTitle').val(''); " type="submit">
+                            <span data-toggle="tooltip" title="Clear Via Path" data-placement="top" class="glyphicon glyphicon-remove-sign"></span>
+                        </button>                      
                    </span>
  			 </div>
 			
@@ -285,14 +308,14 @@ top:0;
                     <input  type="text" class="form-control" id="destination" value="" placeholder="e.g:27.157015,77.991600" autocomplete="off" > 
  			 		<span class="input-group-addon">
                              
-                             <button onclick="var v=$('#start').val(); $('#start').val($('#destination').val()); $('#destination').val(v);" type="submit">
+                             <button onclick="var v=$('#start').val(); $('#start').val($('#destination').val()); $('#destination').val(v);   var v1=$('#startTitle').val(); $('#startTitle').val($('#destTitle').val()); $('#destTitle').val(v);" type="submit">
                             <span data-toggle="tooltip" title="Swap Directions" data-placement="top" class="glyphicon glyphicon-refresh"></span>
                         </button>                      
                    </span>
  			 </div>
  			 
- 			
- 			 	<label class="control-label" style="float:left">Avoids</label>
+ 			<br/>
+ 			 	<label class="control-label" style="float:left">Avoids :</label>
  			 	<div style="float:right">
  			 		<select class="form-control" id="avoids" style="width:165px">
  			 			<option value="1" selected="selected">Toll roads</option>
@@ -303,10 +326,19 @@ top:0;
  			 	</div>
  			 
  			 
- 			 
-		<div style="margin:20px 0 5px 0px;"><button onclick="get_route_result()" >Get Route</button></div><br>
-		<div style="margin:20px 0 5px 0px;"><button onclick="clear_route()" >Clear Route</button></div><br>
-		<div style="margin:20px 0 5px 0px;"><button onclick="post_on_fb()" >Post on FB</button></div><br>
+ 			 <br/>
+ 			  <br/>
+ 			   <br/>
+ 	<div class="row">
+		<div class="col-sm-6 col-md-6"><button onclick="get_route_result()" style="display:inline;" class="btn-info btn-sm">Get Route</button>
+		</div>
+		<div class="col-sm-6 col-md-6">
+		<button onclick="clear_route()" style="display:inline;" class="btn-info btn-sm">Clear Route</button><br>
+	</div>
+	</div>	
+	 <br/>
+	 
+		<button id="fbpost" data-toggle="popover" data-placement="top" class="btn-info btn-sm">Post on FB</button><br>
 		<div id="alternate" style="padding:2px 5px 2px 5px;border:1px solid #ccc;border-radius: 10px;width:254px;display: none">
 			<label><input type="checkbox" id="alternatives"onclick="alternative_route()" style="float: left">
 			 <div style="padding:3px 0px 3px 10px;float:left">Show available alternative route</div></label>	 
@@ -325,7 +357,7 @@ top:0;
 
 
 
-<button id="rightsideNavOpen" onclick="openCloseBarRight()"><span id="RsNBackForward" class="glyphicon glyphicon-forward"></span></button>
+<button id="rightsideNavOpen" onclick="openCloseBarRight()"><span id="RsNBackForward" class="glyphicon glyphicon-backward"></span></button>
 
 
 	
@@ -352,7 +384,7 @@ top:0;
 	        </div>
 	        <div class="modal-body">
 	         
-	<fb:login-button scope="user_posts,user_location,user_photos,user_friends,user_tagged_places" onlogin="checkLoginState();">
+	<fb:login-button scope="user_posts,user_location,user_photos,user_friends,user_tagged_places,publish_actions" onlogin="checkLoginState();">
 	</fb:login-button>
 	        </div>
 	        
@@ -362,9 +394,17 @@ top:0;
 </div>
 <p id="poiCnt"></p>
 <div id="gmap" ></div>
+
+ <div id="popover-content" class="hide">
+        <div class="form-group"> 
+        <label class="control-label" >Message:</label><br/>
+        <textarea class="class-control" id="fbmsg"></textarea>
+          <button class="btn btn-primary btn-xs" id="phSearchButton" type="submit" onclick="post_on_fb()" value="Post on FB" >Post on FB</button> 
+            </div>
+</div>
 </body>
 
 <script src="js.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nanobar/0.4.2/nanobar.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD57HZiUJALNJTO2vXbhp-Nv7TKHlzg1Ss&libraries=places&callback=initMap" async defer></script>
 </html>

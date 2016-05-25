@@ -3,7 +3,7 @@
 	marker=[]
 	var name='';
 	var poiCount=0;
-	
+	var nanobar;
 	$(document).ready(function(){
 		 $('#btnLogout').hide();
 		 $('#profilePic').hide();
@@ -12,6 +12,25 @@
 		 hideDivDirections();
 		 $('[data-toggle="tooltip"]').tooltip(); 
 		 $('#res1Close').hide();
+		 
+		 $('[data-toggle="popover"]').popover({
+			    title:"Post To Facebook ",
+			    html: true, 
+				content: function() {
+			          return $('#popover-content').html();
+			        }
+			});
+		 
+		 
+		 var options = {
+				    classname: 'nanobarClass',
+				  id: 'nanoBarid',
+				    target: document.getElementById('nanobardiv')
+				};
+
+			nanobar	 = new Nanobar( options );
+			openNav();
+
 	});
 	
 	
@@ -123,7 +142,7 @@ wm=map;
 	 // $('#statusMsg'). html('Connected');
 
      // document.getElementById('status').innerHTML = ' Connected';
-      FB.api('/me', 'GET', {"fields":"picture{url},name"},
+      FB.api('/me', 'GET', {"fields":"picture{url},name,location"},
     	function(response) {
     	  name=response.name;
     	  $('#profilePic').show();
@@ -131,8 +150,15 @@ wm=map;
     	  $('#welcome'). html('Welcome '+response.name);
     	  $('#btnLogin').hide();
     	  $('#btnLogout').show();
+    	  //alert((response.location.name).split(",")[0]);
+    	  $('#search').val((response.location.name).split(",")[0]);
+    	  $('#range').val(20000);
+    	  
         });
        testAPI(date);
+       
+      
+       
        
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
@@ -182,10 +208,12 @@ wm=map;
 	  function get_rev_geocode_result(search_lat,search_lng)
 	  {
 	  lat12=search_lat;lng12=search_lng;
-	  document.getElementById('result').innerHTML='Loading...';
+	  nanobar.go(30);
+	 // document.getElementById('result').innerHTML='Loading...';
 	  /**put your REST api lisense key here***/
 	  var rev_geocode_api_url="https://api.mapmyindia.com/v3?fun=rev_geocode&lic_key=ygctu1hkmy6ug5x6o43j36mkg8d8id8g&lng="+search_lng+"&lat="+search_lat+"&callback=rev_geocode_result";
 	  var scriptTag = document.createElement('SCRIPT');scriptTag.src = rev_geocode_api_url;document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
+	  nanobar.go(60);
 	  }
 	  
 	  var rev_marker=[];
@@ -201,8 +229,9 @@ wm=map;
 	     markerr.on('changed',function(){        	 
        	  var point = markerr.position();
        	  get_rev_geocode_result(point.lat,point.lng)
-});
-		  
+
+	 });
+	     nanobar.go(80);
 	     for(var i=0; i<rev_marker.length; i++)
 		  	{
 		  		if(rev_marker[i]) rev_marker[i].map(null);
@@ -213,6 +242,7 @@ wm=map;
 	       rev_geo_flag=false;
 	       $('#startTitle').html(data[0].city);
 	       $('#start').val(lat12+","+lng12);
+	       nanobar.go(100);
 		  return data;
 	 
 	  }
@@ -339,17 +369,31 @@ wm=map;
           });
           mk.on("tap", function(e) {
         	  //info=[];
-        	 
+        	  //mapmyindia_remove_info_window();
         	  position = mk.position();
               arrow_position = mireo.map.info_window.arrow_bottom;
-              pix_offset = new mireo.base.point(0, -13);
+              pix_offset = new mireo.base.point(0, -17);
                   
               window = mapmyindia_infowindow(position, true, pix_offset, arrow_position,infoWindowContent);
              info.push(window);
+             
+             if(type==='visited'){
+           	  $('#start').val(mk.position().lat+","+mk.position().lng);
+           	  $('#startTitle').html(title);
+             }
+             else if(type==='interest'){
+           	  $('#destination').val(mk.position().lat+","+mk.position().lng);
+           	  $('#destTitle').html(title);
+           	  $('#poiCnt').html(poiCount++);
+             }
+             
               //event_div.innerHTML = "Marker tap<br>"+event_div.innerHTML ;
           });
           mk.on("multitap", function(e) {
               event_div.innerHTML = "Marker multitap<br>"+event_div.innerHTML ;
+              $('#via').val(mk.position().lat+","+mk.position().lng);
+           	  $('#viaTitle').html(title);
+           	 
           });
           mk.on("long_press_begin", function(e) {
               event_div.innerHTML = "Marker long press begin<br>"+event_div.innerHTML ;
@@ -381,7 +425,19 @@ wm=map;
           return mk;
       }
 	  
-	 	  
+	  function mapmyindia_remove_info_window() {
+          var infolength = info.length;
+          if (infolength > 0) {
+              for (var i = 0; i < infolength; i++) {
+                  info[i].map(null);
+              }
+          }
+          delete marker;
+          info = [];
+          visbility = false;
+      }	  
+	  
+	  
 	  function mapmyindia_fit_markers_into_bound() {
           var sw = new mireo.wgs.point(Array.max(lati), Array.max(longi));/*south-west WGS location object*/
           var ne = new mireo.wgs.point(Array.min(lati), Array.min(longi));/*north-east WGS location object*/
@@ -437,15 +493,16 @@ wm=map;
 	function get_geocode_result()
 	{		
 		//console.log(marker);
-		
+		//alert("in geocode");
 		search_id=document.getElementById('search');
 		remove_markers();
 		if(search_id.value==''){search_id.focus();return false;}
 		search_id_val=search_id.value;
+		nanobar.go(30);
 		document.getElementById('result').innerHTML='<div style="padding: 0 12px; color: #777">Loading..</div>';
 		var geocode_api_url="https://api.mapmyindia.com/v3?fun=geocode&lic_key=ygctu1hkmy6ug5x6o43j36mkg8d8id8g&q="+search_id.value+"&callback=display_geocode_result";
 		var scriptTag = document.createElement('SCRIPT');scriptTag.src = geocode_api_url;document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
-		
+		nanobar.go(60);
 	}
 	
 	var latitudeArr=[];var longitudeArr=[];
@@ -482,7 +539,7 @@ wm=map;
 			 
 		});
 		document.getElementById('result').innerHTML=result_string+'</ul></div>';/***put geocode result in div****/
-	
+		nanobar.go(100);
 		if(latitudeArr[0]==0||longitudeArr[0]==0){
 			addAlert("Please Enter Correct Search String!!");
 			
@@ -501,10 +558,13 @@ wm=map;
 		var pos=new mireo.wgs.point(lat,lng);
 		map.set_center_and_zoom(pos,7);
 		show_info_window(pos,num-1);
+		
+		
 		get_poi_result(lat,lng);
 		$('#start').val(lat+","+lng);
+		$('#startTitle').val(search_id_val);
 		//initMap();
-		
+		poi_num=1;;
 	}
 	
 
@@ -684,10 +744,24 @@ wm=map;
 	  	delete result_string;all_result=[];
 	  	
 	  }  
-	
+	var poinextflag=false;
 	var poiMarkers=[];
-	function display_poi_result(results, status)
+	poi_num=1;
+	
+	poiTitlearr=[];
+	function display_poi_result(results, status,next_page_token)
 	{
+		
+		
+			var result_string1='<div style="padding: 0 12px;font-size:13px">Search Results</div><div style="font-size: 13px"><ul style="list-style-type:decimal; padding:2px 2px 0 30px">';
+		
+			
+		//console.log(next_page_token.hasNextPage);
+		/*if(next_page_token.hasNextPage &&  poinextflag)
+			next_page_token.nextPage
+
+			poinextflag=true;*/
+		
 		//console.log(results);
 		//console.log(status);
 		//wm.set_center_and_zoom(center,16);/***set map position & zoom***/
@@ -697,8 +771,8 @@ wm=map;
 			
 			//alert("No Places Found of your Interest :( !!");
 		}
+		
 	 if (status === google.maps.places.PlacesServiceStatus.OK) {
-			var result_string='<div style="padding: 0 12px;font-size:13px">Search Results</div><div style="font-size: 13px"><ul style="list-style-type:decimal; padding:2px 2px 0 30px">';
 			var num=1;
 			
 			results.forEach( function( item )
@@ -706,8 +780,7 @@ wm=map;
 			//	alert(item.geometry.location);
 				//alert(item.geometry.location.lng);
 			
-			poi_num=1;
-				
+			if(poi_num<=20){
 			var long1=item.geometry.location.lng();
 			var lati1=item.geometry.location.lat();
 			
@@ -716,6 +789,8 @@ wm=map;
 			/***position of marker*****/
 			//show_markers(num,pos,address);/**display markers***/
 			var title=item.name;
+			poiTitlearr.push(title);
+			
 			var address=item.vicinity;
 			var val=item.geometry.location;
 			var poiFlagmatched=false;
@@ -741,9 +816,9 @@ wm=map;
 			if(!poiFlagmatched){
 				poiMarkers.push((addMarker(pos, icon, title,getPOIInfoWindowContent(item),getPOIDetailContent(item),'interest')));
 				poiMarkers[poiMarkers.length-1].icon().text((poiMarkers.length));
-				result_string+='<li onclick="show_poi_details('+(poi_num++)+','+long1+','+lati1+')">'+title+'</li>';
+				result_string1+='<li onclick="show_poi_details('+(poi_num++)+','+long1+','+lati1+')">'+title+'</li>';
 			}
-			
+			}
 			
 			//console.log(val.lat());
 			
@@ -765,20 +840,26 @@ wm=map;
 			//call_distance_api();
 			//document.getElementById('result').innerHTML=result_string+'</ul></div>';/***put geocode result in div****/
 			//mapmyindia_fit_markers_into_bound(); /***fit map in marker area***/
-			$('#interestResult').html(result_string+'</ul></div>');
+			$('#interestResult').html(result_string1+'</ul></div>');
 			console.log("interest marker end !!");
-		}	
+		}
+		if(poi_num<20)
+			if(next_page_token.hasNextPage)
+			next_page_token.nextPage();
 		
 	}	
 	
-	function show_poi_details(num,lng,lat,pos)
+	function show_poi_details(num,lng,lat,title,pos)
 	{
 		//console.log("show_geocode_details"+num+" "+lng+" "+lat+" "+pos);
 		var pos=new mireo.wgs.point(lat,lng);
 		map.set_center_and_zoom(pos,7);
 		//show_info_window(pos,num-1);
 		//get_poi_result(lat,lng);
+		console.log("showing");
+		$('#destTitle').val(poiTitlearr[num]);
 		$('#destination').val(lat+","+lng);
+		
 		//initMap();
 		
 	}
@@ -842,14 +923,21 @@ wm=map;
 		remove_poi_markers();
 		$('#interestResult').html('');
 	 var start_points=document.getElementById('start').value;/***get start points**/
+	 
 	 var destination_points=document.getElementById('destination').value;/**get destination points**/
-	// via_points=document.getElementById('via').value;/**get via points**/
+	 via_points=document.getElementById('via').value;/**get via points**/
+	 
+	 if(start_points==''||destination_points==''){$('#start').focus();
+	 addAlert("Start and Destination Both points are required!!");
+	 return false;}
+	 
 	 var rtype=0;/**get route type**/
 	 var vtype=0;/**get vehicle type**/
 	 var avoids=document.getElementById('avoids').value;/**get avoids**/
 	 var advices_o=1;/**get advices option**/
 	 alternatives_o=true;/**get alternatives option**/
 	 /**put your REST api lisense key here***/
+	 nanobar.go(30);
 	 var route_api_url="https://api.mapmyindia.com/v3?fun=route&lic_key=ygctu1hkmy6ug5x6o43j36mkg8d8id8g&start="+start_points+"&destination="+destination_points+"&viapoints="+via_points+"&rtype="+rtype+"&vtype="+vtype+"&avoids="+avoids+"&with_advices="+advices_o+"&alternatives="+alternatives_o+"&callback=route_api_result";
 	 var scriptTag = document.createElement('SCRIPT');scriptTag.src = route_api_url;document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
 	 var start_points_array=start_points.split(",");
@@ -860,6 +948,7 @@ wm=map;
 	 mapmyindia_fit_into_bound(start_points_array,destination_points_array);
 	 if(start_info_window) start_info_window.visible(null); /*******remove existing info_windows***/
 	 document.getElementById('direct_advices').style.display="inline-block";
+	 nanobar.go(60);
 	 document.getElementById('direct_advices').innerHTML="<font color='red'>loading..</font>";
 	 document.getElementById('alternatives_advices').innerHTML="";
 	 if(poly['direct']) poly['direct'].map(null);if(poly['alternate']) poly['alternate'].map(null);/*********remove direct route polyline*************/
@@ -936,6 +1025,7 @@ wm=map;
 	 pathArr.push(new mireo.wgs.point(pt[0],pt[1]));
 	 })
 	 draw_polyline("direct",levels,pathArr);/***********draw polyline***/
+	 nanobar.go(100);
 	 }
 	  
 	 function alternative_route(route_no)
@@ -1005,7 +1095,8 @@ wm=map;
 		  function get_rev_geocode_result_dir(search_lat,search_lng,marker_name)
 		  {
 		  lat123=search_lat;lng123=search_lng;
-		  document.getElementById('result').innerHTML='Loading...';
+		  nanobar.go(30);
+		 // document.getElementById('result').innerHTML='Loading...';
 		  /**put your REST api lisense key here***/
 		  var rev_geocode_api_url;
 		  if(marker_name=='start') {
@@ -1015,6 +1106,7 @@ wm=map;
 			  rev_geocode_api_url="https://api.mapmyindia.com/v3?fun=rev_geocode&lic_key=ygctu1hkmy6ug5x6o43j36mkg8d8id8g&lng="+search_lng+"&lat="+search_lat+"&callback=rev_geocode_result_dir_dest";
 			 
 			  var scriptTag = document.createElement('SCRIPT');scriptTag.src = rev_geocode_api_url;document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
+			  nanobar.go(65);
 		  }
 		  
 		  
@@ -1036,6 +1128,7 @@ wm=map;
 					    
 					});
 		    		 show_marker_direction[marker_name]=rev_mark;
+		    		 nanobar.go(100);
 		  }
 		  
 		  function rev_geocode_result_dir_dest(data){
@@ -1157,9 +1250,56 @@ wm.fit_bounds(bounds);/*Sets the center map position and level so that all marke
 //******************************************
 
 function post_on_fb(){
-	//$('#startTitle').val();
-	$('#destTitle').val();
 	
+	$('[data-toggle="popover"]').popover('hide');
+	//$('#startTitle').val();
+	var destval=$('#destTitle').val();
+	var destcoord=$('#destination').val();
+	var fbpostmsg=$('#fbmsg').val();
+	var placeid='';
+   // addAlert(destval +"-- " +destcoord+" =="+fbpostmsg+" safaf");
+//	addAlert("Please Select destination");
+	;
+	
+	FB.api(
+			  '/search',
+			  'GET',
+			  {"q":destval,"type":"place","center":destcoord,"distance":"10000"},
+			  function(response) {
+				  if(response.data==='undefined')
+				
+					  addAlert("something went wrong");
+			     if(response.data.length!=undefined)
+				  if(response.data.length>0){
+			    	 placeid=response.data[0].id;
+			    	// alert(placeid+"   len"+response.data.length);
+			     }
+				  else return;
+			  }
+			);
+	
+	
+/*	FB.api(
+			  '/me/feed',
+			  'POST',
+			  {"message":"asdfgqwerrt","place":"578633375483655"},
+			  function(response) {
+console.log("1213")	;	  }
+			);
+	*/
+	
+	FB.api(
+			  '/me/feed',
+			  'POST',
+			  {"message":fbpostmsg,"place":parseInt(placeid)},
+			  function(response) {
+				  console.log(" 1 "+eval(placeid));
+				  if(response.id!='undefined'){
+			      addAlert(fbpostmsg +"- Posted on fb !!");
+				  console.log(response.id);
+				  }else addAlert("Not posted!");
+			  }
+			);
 	
 	
 	
