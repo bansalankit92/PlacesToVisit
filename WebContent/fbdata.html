@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="https://api.mapmyindia.com/v3?fun=load_api_cached&scope=nt-india&v=0.8&lic_key=5md5sfafqkkmis2k1cthnpcd97smpt26"></script>
+   
+<style type="text/css">
+
+       #map-container {position: absolute;left: 312px; top: 46px;right: 2px; bottom: 2px;border: 1px solid #cccccc; }
+
+
+
+        }
+    </style>
+</head>
+<body>
+<fb:login-button scope="user_posts,user_location,user_friends,user_status,user_tagged_places" onlogin="checkLoginState();">
+</fb:login-button>
+<div id="status"></div>
+<div id="map-container"></div>
+</body>
+
+<script>
+window.onload = function() {
+	  
+	  var map_div = document.getElementById('map-container');
+    var center = new mireo.wgs.point(18.519014043517, 73.931065462589);
+    map = new mireo.map(map_div, {center: center, zoom: 9});
+    map.on("multitap", function(e) {
+	      var icon = mireo.stock_pins.narrow_pin_baloon_black();/*This object means for obtaining icons from MapmyIndia server. All stock icons have size 36px by 36px.*/
+	      var title = "Text marker sample!";
+	      marker.push(addMarker(e.wgs, icon, title));
+	   });
+	   map.on("long_press_begin", function(e) {
+	       var icon = mireo.stock_pins.narrow_pin_baloon_green();/*This object means for obtaining icons from MapmyIndia server. All stock icons have size 36px by 36px.*/
+	       var title = "Text marker sample!";
+	       marker.push(addMarker(e.wgs, icon, title));/*e.wgs provide the wgs location*/ 
+	   });
+		// $('#myModal').modal('show');
+	
+		
+
+}
+function testAPI(date) {
+	FB.api(
+		   '/me/feed',
+		   'GET',
+		   {"fields":"place,created_time,story,message","with":"location","limit":"10000","until":"2016-12-30"},
+		   function(response) {
+		       // Insert your code here
+		       console.log(response);
+		       $('#status').html=response;
+		   }
+		 );
+};
+
+// This is called with the results from from FB.getLoginStatus().
+function statusChangeCallback(response) {
+  console.log('statusChangeCallback');
+  console.log(response);
+  if (response.status === 'connected') {
+    // Logged into your app and Facebook.
+  
+     //  window.location.reload();
+    var date="2016-12-30";
+    document.getElementById('status').innerHTML = '';
+    FB.api('/me', function(response) {
+  	  $('#welcome'). html('Welcome '+response.name);
+  	 
+      });
+     testAPI(date);
+  } else if (response.status === 'not_authorized') {
+    // The person is logged into Facebook, but not your app.
+    document.getElementById('status').innerHTML = 'Please log ' +
+      'into this app.';
+  } else {
+    // The person is not logged into Facebook, so we're not sure if
+    // they are logged into this app or not.
+    document.getElementById('status').innerHTML = 'Please log ' +
+      'into Facebook.';
+  }
+}
+
+function checkLoginState() {
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
+}
+
+window.fbAsyncInit = function() {
+  FB.init({
+  	
+  	appId      : '1705376976394746',
+    //appId      : '1029647623794142',
+    xfbml      : true,
+    version    : 'v2.6'
+  });
+
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+    //console.log(response);
+  });
+};
+
+	  (function(d, s, id){
+	     var js, fjs = d.getElementsByTagName(s)[0];
+	     if (d.getElementById(id)) {return;}
+	     js = d.createElement(s); js.id = id;
+	     js.src = "//connect.facebook.net/en_US/sdk.js";
+	     fjs.parentNode.insertBefore(js, fjs);
+	   }(document, 'script', 'facebook-jssdk'));
+
+
+
+</script>
+</html>

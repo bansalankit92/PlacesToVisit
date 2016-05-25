@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Facebook Login JavaScript Example</title>
+
+ <meta charset="utf-8">
+ 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<style type="text/css">
+
+.navbar {  background-color: transparent;
+   background: transparent;
+   border-color: transparent;
+   
+   }
+      #map-container {border-color: transparent;position: absolute;left: 0px; top: 0px;right: 2px; bottom: 2px;border: 1px solid #cccccc; }
+      
+ #sideNavOpen{
+	/* 100% Full-height */
+	height:30px;
+    width:40px; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 50px;
+    left: 0px;
+   background-color: #ffffff;
+  
+    overflow-x: hidden; /* Disable horizontal scroll */
+   
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+ 
+ }   
+ 
+ #rightsideNavOpen{
+ height:30px;
+    width:40px; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 50px;
+    right: 0px;
+   background-color: #ffffff;
+  
+    overflow-x: hidden; /* Disable horizontal scroll */
+   
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+ 
+ }
+   
+.sidenav {
+    height: 100%; /* 100% Full-height */
+    width:0px; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    left: 0;
+   background-color: transparent;
+ 
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 50px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+.progress {
+    height: 7px; 
+    width:100%; 
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+
+}
+
+
+
+.rightSidenav {
+    height: 100%; /* 100% Full-height */
+    width:0px; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    right: 0;
+   background-color: red;
+ 
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 50px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #0d0d0d;
+    display: block;
+    transition: 0.3s
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover, .offcanvas a:focus{
+    color: #1a1a1a;
+}
+
+/* Position and style the close button (top right corner) */
+.closebtn {   
+    position: absolute;
+    right: 20px;
+    font-size: 36px !important;
+    margin-left: 60px;
+}
+
+.alert {
+  position: absolute;
+  top: 40px;
+  align:"center";
+  right: 50px;
+   width: 500px;
+   align-content: center;
+   z-index:1;
+   opacity:0.8;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+    transition: margin-left .5s;
+    padding: 20px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+}
+
+
+
+
+
+li{padding:0 5px 10px 0;cursor:pointer;color: #333;}
+li:hover{color:#00adff;cursor:pointer;text-decoration:underline}
+
+
+#topBar{
+left:0;
+top:0;
+}
+
+
+.stylish-input-group .input-group-addon{
+    background: white !important; 
+}
+.stylish-input-group .form-control{
+	border-right:0; 
+	box-shadow:0 0 0; 
+	border-color:#ccc;
+}
+.stylish-input-group button{
+    border:0;
+    background:transparent;
+}
+ </style>
+    
+    <!--user's map javascript license key goes here-->
+ <script type="text/javascript" src="https://api.mapmyindia.com/v3?fun=load_api_cached&scope=nt-india&v=0.8&lic_key=5md5sfafqkkmis2k1cthnpcd97smpt26"></script>
+      
+
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Places To Visit</a>
+    </div>
+  <div id="topBar" class="nav navbar-nav navbar-right">
+		<button id="btnLogin" type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">Login 	</button>
+	
+		<img id="profilePic" style="display:inline;" class="img-circle" alt="Profile Picture">
+		<h3 align="center"  style=" color:#000000;display:inline;top:0;right:0;" id="welcome"></h3>
+		 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button align="center" style="display:inline;" id="btnLogout" onclick="logout()" type="button"
+			 class="btn btn-info btn-sm" >Logout 	
+		 </button>
+	</div>
+  
+  </div>
+</nav>
+<div class="container">
+
+			 	
+	
+	<p id="val"><p>
+
+<div id="alerts"></div>
+
+	<!-- <div align="center" class="alert alert-info" id="status"> 
+		<a href="#" class="close"  data-dismiss="alert" aria-label="close">&times;</a>
+		<p id="statusMsg"></p>
+	</div> -->
+	<div id="event-log"></div>
+
+	<button id="sideNavOpen" onclick="openCloseBar()"><span id="sNBackForward" class="glyphicon glyphicon-forward"></span></button>
+
+ 	<div id="map-container"></div>
+ 	
+ 	
+ 	
+	<div class="sidenav" id="menu" style="background-color:#f2f2f2;opacity: 0.9;">
+	
+<!-- 	<a href="javascript:void(0)" style="color:black;" class="closebtn" onclick="closeNav()">&times;</a> -->
+		
+		<div  style="opacity: 1; background-color:#f2f2f2;padding: 0 12px 0 17px;line-height:20px ">
+			<!-- <div style="padding: 5px 0;font-size:13px;color:#222">Enter Location</div> -->
+			
+			 <div class="form-group">
+     
+			      <label for="sel2">What's Your Interest Today?</label>
+			      <select multiple class="form-control" id="interests">
+			        <option  value="natural_feature">Natural features</option>
+			        <option value="amusement_park">Amusement Parks</option>
+			        <option value="zoo">Zoo</option>
+			        <option value="stadium">Stadium</option>
+			        <option value="art_gallery">Art Gallery</option>
+			        <option value="book_store">Book Store</option>
+			        <option selected = "selected" value="shopping_mall">Shopping Mall </option>
+			         <option value="restaurant">Restaurant</option>
+			         <option value="establishment">Establishment</option>
+			         <option value="night_club">Night Clubs</option>
+			         <option value="museum">Museum</option>
+			        <option value="movie_theater">Movie Theaters</option>
+			          <option value="library">Library</option>
+			          <option value="point_of_interest">Points of Interest</option>
+			          
+			      </select>
+    		</div>
+			
+			<div class=" input-group stylish-input-group">
+                    <input data-toggle="tooltip" title="Range in mts" data-placement="top"  value="5000"  type="number" step="500" min="1000" class="form-control"  id="range" placeholder="1000" autocomplete="off" autofocus="" >
+                    <span class="input-group-addon">
+                            <button type="submit">
+                            <span class="glyphicon "></span>
+                        </button>
+                        </span>
+                </div>
+			<br/>
+			<div class=" input-group stylish-input-group">
+                    <input data-toggle="tooltip" title="Search Places" data-placement="top"   type="text" class="form-control"  id="search" placeholder="Address, busines or location" autocomplete="off" autofocus="" onkeypress="if(event.which == 13 || event.keyCode == 13) get_geocode_result()" >
+                    <span class="input-group-addon">
+                        <button onclick="get_geocode_result()" type="submit">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button> 
+                        <button onclick="toggleDirections()" type="submit">
+                            <span data-toggle="tooltip" title="Get Directions" data-placement="top" class="glyphicon glyphicon-hand-right"></span>
+                        </button>  
+                    </span>
+                </div>
+                
+			
+ 			 
+		</div>
+		<div>
+		  
+		<a href="#" class="closebtn" aria-label="close" id="res1Close" onclick="$('#result1').html('');$('#res1Close').hide();">&times;</a>
+			<div style="padding:10px; margin-top: 12px" id="result1"></div>
+		</div>
+		<div style="border-top: 1px solid #e9e9e9;padding:10px; margin-top: 12px" id="result"></div>
+		
+	<div id="divDirections" style="opacity: 1; background-color:#f2f2f2;padding: 0 12px 0 17px;line-height:20px ">
+			<label class="control-label" >Start:&nbsp;<p style="display:inline;" id="startTitle"></p>			  </label>
+			<div id="divStart" class=" input-group stylish-input-group">
+				
+                    <input  type="text" class="form-control" id="start" value="" placeholder="e.g:27.157015,77.991600" autocomplete="off" > 
+ 			 		<span class="input-group-addon">
+                            
+                             <button onclick="var v=$('#start').val(); $('#start').val($('#destination').val()); $('#destination').val(v);" type="submit">
+                            <span data-toggle="tooltip" title="Swap Directions" data-placement="top" class="glyphicon glyphicon-refresh"></span>
+                        </button> 
+                                           
+                   </span>
+ 			 </div>
+			
+			<label class="control-label" >Destination:&nbsp;<p style="display:inline;" id="destTitle"></p>				  </label>
+			<div id="divDest" class=" input-group stylish-input-group">				
+                    <input  type="text" class="form-control" id="destination" value="" placeholder="e.g:27.157015,77.991600" autocomplete="off" > 
+ 			 		<span class="input-group-addon">
+                             
+                             <button onclick="var v=$('#start').val(); $('#start').val($('#destination').val()); $('#destination').val(v);" type="submit">
+                            <span data-toggle="tooltip" title="Swap Directions" data-placement="top" class="glyphicon glyphicon-refresh"></span>
+                        </button>                      
+                   </span>
+ 			 </div>
+ 			 
+ 			
+ 			 	<label class="control-label" style="float:left">Avoids</label>
+ 			 	<div style="float:right">
+ 			 		<select class="form-control" id="avoids" style="width:165px">
+ 			 			<option value="1" selected="selected">Toll roads</option>
+ 			 			<option value="2">Ferries</option>
+ 			 			<option value="4" >Unpaved roads</option>
+ 			 			<option value="8">Highways</option>
+ 			 		</select>
+ 			 	</div>
+ 			 
+ 			 
+ 			 
+		<div style="margin:20px 0 5px 0px;"><button onclick="get_route_result()" >Get Route</button></div><br>
+		<div style="margin:20px 0 5px 0px;"><button onclick="clear_route()" >Clear Route</button></div><br>
+		<div style="margin:20px 0 5px 0px;"><button onclick="post_on_fb()" >Post on FB</button></div><br>
+		<div id="alternate" style="padding:2px 5px 2px 5px;border:1px solid #ccc;border-radius: 10px;width:254px;display: none">
+			<label><input type="checkbox" id="alternatives"onclick="alternative_route()" style="float: left">
+			 <div style="padding:3px 0px 3px 10px;float:left">Show available alternative route</div></label>	 
+	 	</div>
+ 
+		<div id="info" style="border-top: 1px solid #e9e9e9;font-size:12px;padding-left: 10px;background:#f7f7f7;margin-top: 10px"></div>
+		<div style="padding:10px;font-size:11px ;overflow:auto" id="direct_advices"></div>
+		<div style="padding:10px;font-size:11px ;overflow:auto;display:none" id="alternatives_advices"></div>
+
+	</div>
+		
+		
+		
+		
+	</div>
+
+
+
+<button id="rightsideNavOpen" onclick="openCloseBarRight()"><span id="RsNBackForward" class="glyphicon glyphicon-forward"></span></button>
+
+
+	
+	<div class="rightSidenav" id="menuR" style="background-color:#f2f2f2;opacity: 0.9;">
+	
+<!-- 	<a href="javascript:void(0)" style="color:black;" class="closebtn" onclick="closeNav()">&times;</a> -->
+		
+			<div  style="opacity: 1; background-color:#f2f2f2;padding: 0 12px 0 17px;line-height:20px ">
+	<a href="#" class="closebtn" aria-label="close" id="rest1Close" onclick="$('#interestResult').html('');$('#rest1Close').hide();">&times;</a>
+		
+	<div style="border-top: 1px solid #e9e9e9;padding:10px; margin-top: 12px" id="interestResult"></div>
+		
+	
+	</div>
+</div>
+
+
+	<div class="modal fade" id="myModal" role="dialog">
+	    <div class="modal-dialog modal-sm">
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          
+	          <h4 class="modal-title">login with FB</h4>
+	        </div>
+	        <div class="modal-body">
+	         
+	<fb:login-button scope="user_posts,user_location,user_photos,user_friends,user_tagged_places" onlogin="checkLoginState();">
+	</fb:login-button>
+	        </div>
+	        
+	      </div>
+	    </div>
+	  </div>
+</div>
+<p id="poiCnt"></p>
+<div id="gmap" ></div>
+</body>
+
+<script src="js.js"></script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD57HZiUJALNJTO2vXbhp-Nv7TKHlzg1Ss&libraries=places&callback=initMap" async defer></script>
+</html>

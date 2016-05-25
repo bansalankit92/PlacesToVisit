@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Facebook Login JavaScript Example</title>
+
+ <meta charset="utf-8">
+ 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<style type="text/css">
+
+       #map-container {position: absolute;left: 312px; top: 46px;right: 2px; bottom: 2px;border: 1px solid #cccccc; }
+#menu {position: absolute;left: 2px; top: 46px;width: 306px;bottom: 2px;border: 1px solid #cccccc;background-color: #FAFAFA;overflow-x:hidden;overflow-y: auto;}
+li{padding:0 5px 10px 0;cursor:pointer;color: #333;}
+li:hover{color:#00adff;cursor:pointer;text-decoration:underline}
+
+
+        }
+    </style>
+    
+    <!--user's map javascript license key goes here-->
+    <script type="text/javascript" src="https://api.mapmyindia.com/v3?fun=load_api_cached&scope=nt-india&v=0.8&lic_key=5md5sfafqkkmis2k1cthnpcd97smpt26"></script>
+      
+
+</head>
+<body>
+<script>
+	map=null;
+	places=new Array();
+	marker=[]
+	
+	
+	
+	window.onload = function() {
+		  
+		  var map_div = document.getElementById('map-container');
+	      var center = new mireo.wgs.point(18.519014043517, 73.931065462589);
+	      map = new mireo.map(map_div, {center: center, zoom: 9});
+	      map.on("multitap", function(e) {
+		      var icon = mireo.stock_pins.narrow_pin_baloon_black();/*This object means for obtaining icons from MapmyIndia server. All stock icons have size 36px by 36px.*/
+		      var title = "Text marker sample!";
+		      marker.push(addMarker(e.wgs, icon, title));
+		   });
+		   map.on("long_press_begin", function(e) {
+		       var icon = mireo.stock_pins.narrow_pin_baloon_green();/*This object means for obtaining icons from MapmyIndia server. All stock icons have size 36px by 36px.*/
+		       var title = "Text marker sample!";
+		       marker.push(addMarker(e.wgs, icon, title));/*e.wgs provide the wgs location*/ 
+		   });
+			// $('#myModal').modal('show');
+		   $('#myModal').modal({backdrop: 'static', keyboard: false})  
+
+	};
+	
+  // This is called with the results from from FB.getLoginStatus().
+  var name='';
+  function statusChangeCallback(response) {
+    console.log('statusChangeCallback');
+    console.log(response);
+    if (response.status === 'connected') {
+      // Logged into your app and Facebook.
+      $('#myModal').modal('hide');
+       //  window.location.reload();
+      var date="2016-12-30";
+      document.getElementById('status').innerHTML = '';
+      FB.api('/me', function(response) {
+    	  name=response.name;
+    	  $('#welcome'). html('Welcome '+response.name);
+    	  $('#btnLogin').hide();
+        });
+       testAPI(date);
+    } else if (response.status === 'not_authorized') {
+      // The person is logged into Facebook, but not your app.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into this app.';
+    } else {
+      // The person is not logged into Facebook, so we're not sure if
+      // they are logged into this app or not.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into Facebook.';
+    }
+  }
+
+  function checkLoginState() {
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+  }
+
+  window.fbAsyncInit = function() {
+    FB.init({
+      	//appId      : '1705376976394746',
+
+    	appId      : '115705751855005',
+      //appId      : '1029647623794142',
+      xfbml      : true,
+      version    : 'v2.6'
+    });
+
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+      //console.log(response);
+    });
+};
+
+	  (function(d, s, id){
+	     var js, fjs = d.getElementsByTagName(s)[0];
+	     if (d.getElementById(id)) {return;}
+	     js = d.createElement(s); js.id = id;
+	     js.src = "//connect.facebook.net/en_US/sdk.js";
+	     fjs.parentNode.insertBefore(js, fjs);
+	   }(document, 'script', 'facebook-jssdk'));
+ 
+	  var infowindow=[]
+	  var info = [];
+      var visbility = false;
+	  function addMarker(position, icon, title,fullresponse, draggable) {
+          var event_div = document.getElementById("event-log");
+          var mk = new mireo.map.marker({
+              icon: icon, /*Each marker instance has to have icon/image associated with it (without it, it is simply not visible). We have specified url to
+               the image file on server disk, and also some offset within this image file (several "pins" are contained). */
+              handle_input: true, /*The handle_input flag must be set to true if the intended use of this object requires it to react to input events. */
+              draggable: draggable, /*The draggable flag is set to false, so this particular marker is not draggable on the map. */
+              title: title, /*The title sets the standard HTML5 title attribute, the position places this marker on the map. The z_order value specifies the relative z-order to the map.*/
+              position: position, /*must be instance of mireo.wgs.point that replaces current WGS position of this object. Will always return current WGS position.*/
+              map: map, /* The map parameter is crucial, because each map object adds itself to specified map, and if omitted, it would have been null, and consequently would not be seen on the map.*/
+              visible: true, /* If false, this object is not drawn in DOM. Default is true*/
+              z_order: 250/*z-order of this object when drawn on the map. The actual "z-index" CSS property used is calculated from this property, based on relative position to the current center 
+               point of the map in screen coordinates. The default value is 1.*/
+          });
+          /*The code that follows creation of the marker instance demostrates how to use the event handling via on function
+           * The following events:*/
+          mk.on("select", function(e) {
+        	 
+              //console.log(info);
+              event_div.innerHTML = "Marker select<br>"+event_div.innerHTML ;
+          });
+          mk.on("tap", function(e) {
+        	  //info=[];
+        	  position = mk.position();
+              arrow_position = mireo.map.info_window.arrow_bottom;
+              pix_offset = new mireo.base.point(0, -13);
+              window = mapmyindia_infowindow(position, true, pix_offset, arrow_position, "<div style=\"padding:10px;font-size:13px;width:200px\"><strong>Story:</strong>"+fullresponse.story.replace('Ankit Bansal','You')+" <br/><strong>Date:</strong> "+fullresponse.created_time.split("T")[0]+"<div>"               );
+             info.push(window);
+              //event_div.innerHTML = "Marker tap<br>"+event_div.innerHTML ;
+          });
+          mk.on("multitap", function(e) {
+              event_div.innerHTML = "Marker multitap<br>"+event_div.innerHTML ;
+          });
+          mk.on("long_press_begin", function(e) {
+              event_div.innerHTML = "Marker long press begin<br>"+event_div.innerHTML ;
+          });
+          mk.on("long_press_end", function(e) {
+              event_div.innerHTML = "Marker long press end<br>"+event_div.innerHTML ;
+          });
+          return mk;
+      }
+	  function mapmyindia_infowindow(position, auto_close, pix_offset, arrow_pos, cont) {
+          return new mireo.map.info_window({
+              position: position, /*The WGS position of the info window on the map. If arrow is specified, info_window will be drawn so that the tip of the arrow is placed on provided position. */
+              map: map, /*The map this object will be appended to. The default is null object.*/
+              info_content: cont,
+             // auto_close: auto_close, /*The auto_close property defines if info window will be auto closable. Autoclosable info window does not show the close button, and can only be close by input (mouse) action outside itself.*/
+              arrow_pos: arrow_pos, /*The info_content can either be ready HTML element, or string in which case a div element will be created and passed info_content will be added to it as its innerHTML. */
+              pix_offset: pix_offset, /*Relative offset in screen coordinates from (transformed) position on the map.*/
+              close_button: {
+                  url: "fancy-window-close-icon.png",
+                  size: new mireo.base.size(16, 16)/*If the string is provided, that should be the id of the HTML element that should act as a close button. The onclick event on this element will close the info window. This option is ignored if auto_close is set. If this option is not specified or is invalid, and auto_close is not set, default close button will be created. */
+              }
+          });
+      }
+	  function mapmyindia_fit_markers_into_bound() {
+          var sw = new mireo.wgs.point(Array.max(lati), Array.max(longi));/*south-west WGS location object*/
+          var ne = new mireo.wgs.point(Array.min(lati), Array.min(longi));/*north-east WGS location object*/
+          var bounds = new mireo.wgs.bounds(sw, ne);/*This class represents bounds on the Earth sphere, defined by south-west and north-east corners.i.e Creates a new WGS bounds.*/
+          map.fit_bounds(bounds);/*Sets the center map position and level so that all markers is the area of the map that is displayed in the map area*/
+
+      }
+	  
+	  Array.max = function(array) {
+          return Math.max.apply(Math, array);
+      };
+      Array.min = function(array) {
+          return Math.min.apply(Math, array);
+      };
+	  
+      lati=[];
+      longi=[];
+	  
+      
+     
+      var titleArr=[];
+      var fullresponse=[];
+function testAPI(date) {
+    console.log('Welcome!  Fetching your information.... ');
+    
+    Object.prototype.hasOwnProperty = function(property) {
+        return typeof  this[property] !== undefined;
+    };
+    
+      FB.api('/me/feed',
+    		  'GET',
+    		  {"fields":"place,created_time,story,message","with":"location","limit":"10000","until":date},
+    		  function(response) {
+    			  console.log(response);
+    			   //alert(response.data.length);
+    			   
+  			     if(response.data.length===0){
+  			    	
+    			   		return;
+  			     }	               
+			     var nextPage=response.paging.next;
+			     var createdTime="";
+    			   
+				for(var i=0;i<response.data.length;i++){
+					//alert(response.data[i].created_time);
+					fullresponse.push(response.data[i]);
+					createdTime=response.data[i].created_time;
+					console.log("i: " +i+' data '+response.data[i]);
+					if(typeof  response.data[i].place.location==='undefined'){
+						alert("no place");
+						
+					}else{
+					 lati.push(response.data[i].place.location.latitude);
+					 longi.push(response.data[i].place.location.longitude);					
+					
+			         var icon = mireo.stock_pins.small_circle_red();/*This object means for obtaining icons from MapmyIndia server. All stock icons have size 36px by 36px.*/
+	                 var postion = new mireo.wgs.point(response.data[i].place.location.latitude, response.data[i].place.location.longitude);/*WGS location object*/
+	                 var title = response.data[i].place.name;
+	                titleArr.push(title);
+	            
+	                 marker.push(addMarker(postion, icon, title,response.data[i]));					
+				
+	                 var windo={};
+		                windo.position =postion;
+		                windo.arrow_position = mireo.map.info_window.arrow_bottom;
+		                windo.pix_offset = new mireo.base.point(0, -13);
+		                windo.content="<div style=\"padding:10px;font-size:13px;width:200px\"><strong>Story:</strong>"+response.data[i].story.replace(name,'You')+" <br/><strong>Date:</strong> "+response.data[i].created_time.split("T")[0]+"<div>";
+		               	
+		                
+		                
+		                infowindow.push(windo);
+					}   
+				}
+				var mydate=createdTime.split("T")[0];
+				var newdate=(mydate.split('-')[0]-1)+'-'+12+'-'+31;
+				//alert(newdate);
+				testAPI(newdate);
+				mapmyindia_fit_markers_into_bound();
+			}
+    	);
+ }
+ 
+function mapmyindia_remove_info_window() {
+    var infolength = info.length;
+    if (infolength > 0) {
+        for (var i = 0; i < infolength; i++) {
+            info[i].map(null);
+        }
+    }
+    delete marker;
+    info = [];
+    //document.getElementById("visible").innerHTML = "Hide Info Window(s)";
+    visbility = false;
+}
+	  
+function remove_markers()
+{
+	/**remove all marker from map***/
+	for(var i=0; i<show_marker.length; i++)
+	{
+	if(show_marker[i]) show_marker[i].map(null);
+	}
+	delete show_marker;show_marker=[];/***delete marker array**/
+	delete result_string;all_result=[];
+}  
+var start_info_window;
+function show_info_window(pos,num)
+{
+	if(start_info_window) start_info_window.visible(null); /*******remove existing info_windows***/
+	start_info_window = new mireo.map.info_window({/****info_window display, for more visit detail documentation **/
+	position: pos,
+	auto_close: false,
+	arrow_pos: mireo.map.info_window.arrow_bottom,
+	info_content: '<table style=\"width:350px;padding:10px;font-size: 10px;font-type: bold;\">'+details[num]+'</table>',
+	pix_offset: new mireo.base.point(0, -40),
+	map: map,
+	 
+	});
+}
+
+
+var show_marker=[];
+function show_markers(num,pos,address)
+{
+	//if(start_info_window) start_info_window.map(null); /*******remove existing info_windows***/
+	/****marker display, for more about marker, please refer our marker documentation****/
+	show_marker[num] =new mireo.map.marker({
+	icon: mireo.stock_pins.pin_circle_dark_blue(),
+	handle_input:true,
+	draggable:false,
+	title:address,
+	position: pos,
+	z_order:100,
+	map: map
+	});
+	show_marker[num].icon().text(num,{"font-size":"12px"});/*****************text on marker***/
+	show_marker[num].on('tap',function(){show_info_window(pos,num-1);}); /***tap event on marker to show info window***/
+
+	
+	//console.log(show_marker);
+	
+}
+
+function show_geocode_details(num,lng,lat,pos)
+{
+	var pos=new mireo.wgs.point(lat,lng);
+	map.set_center_and_zoom(pos,5);
+	show_info_window(pos,num-1);
+}
+ 
+var search_id_val='';
+function get_geocode_result()
+{
+	
+	//console.log(marker);
+	
+	 search_id=document.getElementById('search');
+	remove_markers();
+	if(search_id.value==''){search_id.focus();return false;}
+	search_id_val=search_id.value;
+	document.getElementById('result').innerHTML='<div style="padding: 0 12px; color: #777">Loading..</div>';
+	/*put your REST license key here, you can use it through REST request in any dynamic page for security of your REST license key. */
+	var geocode_api_url="https://api.mapmyindia.com/v3?fun=geocode&lic_key=ygctu1hkmy6ug5x6o43j36mkg8d8id8g&q="+search_id.value+"&callback=display_geocode_result";
+	var scriptTag = document.createElement('SCRIPT');scriptTag.src = geocode_api_url;document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
+	
+}
+
+
+
+function call_distance_api()
+{
+	$('#result1').html('');
+	/***************get parameters*************************/
+	var center_points=lati[0]+','+longi[0];
+	var searcharr=search_id_val.split(' ');
+	var flag=false;
+	for(var i=0;i<searcharr.length;i++){
+		flag=false;
+		//alert(searcharr[i].toUpperCase());
+		for(var j=0;j<titleArr.length;j++){
+			//console.log(searcharr[i].toUpperCase()+'  '+(titleArr[j].toUpperCase())+'  = '+(searcharr[i].toUpperCase().search(titleArr[j].toUpperCase())));
+			if((titleArr[j].toUpperCase().search(searcharr[i].toUpperCase()))!=-1){
+				center_points=lati[j]+','+longi[j];
+				mapmyindia_infowindow(infowindow[j].position, true, infowindow[j].pix_offset, infowindow[j].arrow_position, infowindow[j].content);
+				
+				alert("You know this Place!!");
+				flag=true;
+				break;
+			}
+			
+		}
+		if(flag)break;
+	}	
+	if(!flag){
+		$('#result1').html("You haven't visited "+search_id_val+ "");
+		alert("You haven't visited "+search_id_val);
+	}
+	
+	var pts="";
+	for(var i=0;i<=show_marker.length;i++)
+	{
+	//show_markers(i,val.split(","));
+	if(pts=='') pts=latitudeArr[i]+','+longitudeArr[i]; else pts+="|"+latitudeArr[i]+','+longitudeArr[i];
+	
+	}
+	/**put your REST api lisense key here***/
+	var route_api_url="https://api.mapmyindia.com/v3?fun=star_dists&lic_key=ygctu1hkmy6ug5x6o43j36mkg8d8id8g&center="+center_points+"&pts="+pts+"&rtype=1&vtype=0&avoids=0&callback=distance_api_result";
+	var scriptTag = document.createElement('SCRIPT');scriptTag.src = route_api_url;document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
+	//show_markers("center",center_points.split(","));
+	//mapmyindia_fit_into_bound();
+	document.getElementById('result').innerHTML="loading..";
+	//alert(route_api_url);
+}
+ 
+var result="";
+function distance_api_result(data)
+{
+	var num=1;var result="<br><span style='font-size:12px'>Showing distance & duration from center point</span><br><br>";
+	data.forEach( function( item )
+	{
+	var duration=item["duration"];
+	/*****convert hrs & min********/
+	var hours = Math.floor(duration/3600);duration %=3600; var minutes = Math.floor(duration / 60);
+	var total_time=(hours >=1 ? hours+" hrs " : '')+(minutes >=1 ? minutes+" mins " : '');
+	/**************/
+	
+	//alert("time "+total_time);
+	if((item["length"]/1000)<=2)alert("You have visited this place!!");
+	
+	var length=(item["length"]/1000).toFixed(1)+" km";
+	
+	
+	result+="<div style='padding:5px 0 2px 0px;color:#222;font-size:13px'>Marker "+num+"</div>";
+	result+="<div><span style='padding-right:18px'>Duration</span>: "+total_time+"</div>";
+	result+="<div ><span style='padding-right:18px'>Distance</span>: "+length+"</div>";
+	//result+="<div style='border-bottom: 1px solid #e9e9e9;padding-bottom:10px'><span style='padding-right:5px'>Wgs Points</span>: "+document.getElementById(num++).value+"</div>";
+	});
+	//document.getElementById('result').innerHTML=result;
+}
+
+
+
+
+function remove_markers()
+{
+/**remove all marker from map***/
+	for(var i=0; i<show_marker.length; i++)
+	{
+	if(show_marker[i]) show_marker[i].map(null);
+	}
+	delete show_marker;show_marker=[];/***delete marker array**/
+	delete result_string;all_result=[];
+}
+
+
+var latitudeArr=[];var longitudeArr=[];
+function display_geocode_result(data)
+{
+details = [];
+	//wm.set_center_and_zoom(center,16);/***set map position & zoom***/
+	//remove_markers();/***********remove existing marker from map**/
+	var result_string='<div style="padding: 0 12px;font-size:13px">Search Results</div><div style="font-size: 13px"><ul style="list-style-type:decimal; padding:2px 2px 0 30px">';
+	var num=1;
+	data.forEach( function( item )
+	{
+	var lng=item["lng"];
+	var lat=item["lat"];
+	var address=item["formatted_address"];
+	var pos=new mireo.wgs.point(lat,lng); /***position of marker*****/
+	show_markers(num,pos,address);/**display markers***/
+	var content = new Array();
+	if(item["city"]!='') content.push('<tr><td style="white-space:nowrap">City</td><td width="10px">:</td><td>'+item["city"]+'</td></tr>');
+	if(item["area"]!='') content.push('<tr><td style="white-space:nowrap">Area</td><td width="10px">:</td><td>'+item["area"]+'</td></tr>');
+	if(item["PLZ"]!='') content.push('<tr><td style="white-space:nowrap">Pin</td><td width="10px">:</td><td>'+item["PLZ"]+'</td></tr>');
+	if(item["street"]!='') content.push('<tr><td style="white-space:nowrap">Street</td><td width="10px">:</td><td>'+item["street"]+'</td></tr>');
+	if(item["house_no"]!='') content.push('<tr><td style="white-space:nowrap">house No</td><td width="10px">:</td><td>'+item["house_no"]+'</td></tr>');
+	if(item["POI"]!='') content.push('<tr><td style="white-space:nowrap">POI</td><td width="10px">:</td><td>'+item["POI"]+'</td></tr>');
+	if(item["phone"]!='') content.push('<tr><td style="white-space:nowrap">phone</td><td width="10px">:</td><td>'+item["phone"]+'</td></tr>');
+	if(address!='') content.push('<tr><td style="white-space:nowrap" valign="top">Formatted address</td><td width="10px" valign="top">:</td><td valign="top">'+address+'</td></tr>');
+	details.push(content.join(""));
+	result_string+='<li onclick="show_geocode_details('+(num++)+','+lng+','+lat+')">'+address+'</li>';
+	longitudeArr.push(lng);
+	latitudeArr.push(lat);
+	 
+	});
+	call_distance_api();
+	document.getElementById('result').innerHTML=result_string+'</ul></div>';/***put geocode result in div****/
+	mapmyindia_fit_markers_into_bound(); /***fit map in marker area***/
+}
+ 
+ function logout(){
+	 FB.logout();
+	 window.location.reload();
+ }
+	  
+</script>
+
+<!--
+  Below we include the Login Button social plugin. This button uses
+  the JavaScript SDK to present a graphical Login button that triggers
+  the FB.login() function when clicked.
+-->
+<button id="btnLogin" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Login 	</button>
+
+<h3 style="display:inline;" id="welcome"></h3>
+&nbsp;&nbsp;&nbsp;&nbsp;<button style="display:inline;" id="btnLogout" onclick="logout()" type="button" class="btn btn-info btn-sm" >Logout 	</button>
+<p id="val"><p>
+
+<div id="status"></div>
+<div id="event-log"></div>
+
+
+ <div id="map-container"></div>
+<div id="menu">
+<div style="padding: 0 12px 0 17px;line-height:20px"><div style="padding: 5px 0;font-size:13px;color:#222">Enter Location</div>
+<input type="text" style="width: 254px; margin-right: 10px;padding:5px;border:1px solid #ddd;color:#555" id="search" placeholder="Address, busines or location" autocomplete="off" autofocus="" onkeypress="if(event.which == 13 || event.keyCode == 13) get_geocode_result()"/><br/>
+<button onclick="get_geocode_result()" style="margin-top:10px">Search</button>
+</div>
+<div style="padding:10px; margin-top: 12px" id="result1"></div>
+
+
+<div style="border-top: 1px solid #e9e9e9;padding:10px; margin-top: 12px" id="result"></div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          
+          <h4 class="modal-title">login with FB</h4>
+        </div>
+        <div class="modal-body">
+         
+<fb:login-button scope="user_posts,user_location,user_photos,user_friends,user_tagged_places" onlogin="checkLoginState();">
+</fb:login-button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</body>
+</html>
